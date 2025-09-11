@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #define Max 200
-int id = 1; // id unique
 typedef struct
 {
     int idAvion;
@@ -42,14 +41,13 @@ void Ajoute_avions()
     scanf("%d", &numb);
     for (int i = 0; i < numb; i++)
     {
-        ae.avion[ae.nbAvions].idAvion = id;
+        ae.avion[ae.nbAvions].idAvion = ae.nbAvions + 1;
         printf("Saisir le model de l'avion %d : ", i + 1);
         scanf(" %[^\n]%*c", ae.avion[ae.nbAvions].modele);
         printf("Saisir la capacite de l'avion %d : ", i + 1);
         scanf("%d", &ae.avion[ae.nbAvions].capacite);
         strcpy(ae.avion[ae.nbAvions].statut, "Disponible");
         ae.nbAvions++;
-        id++;
     }
 }
 
@@ -214,10 +212,11 @@ void modifier_avion()
         printf("Avion introuvable \n");
     }
 }
-void trie_par_capacite(){
+void trie_par_capacite()
+{
     for (int i = 0; i < ae.nbAvions; i++)
     {
-        for (int j = i+1; j < ae.nbAvions; j++)
+        for (int j = i + 1; j < ae.nbAvions; j++)
         {
             if (ae.avion[i].capacite > ae.avion[j].capacite)
             {
@@ -225,29 +224,26 @@ void trie_par_capacite(){
                 ae.avion[i] = ae.avion[j];
                 ae.avion[j] = temp;
             }
-            
         }
-        
-    }    
+    }
 }
-void trie_par_model(){
+void trie_par_model()
+{
     for (int i = 0; i < ae.nbAvions; i++)
     {
-        for (int j = i+1; j < ae.nbAvions; j++)
+        for (int j = i + 1; j < ae.nbAvions; j++)
         {
-            if (stricmp(ae.avion[i].modele,ae.avion[j].modele)>0)
+            if (stricmp(ae.avion[i].modele, ae.avion[j].modele) > 0)
             {
                 Avions temp = ae.avion[i];
                 ae.avion[i] = ae.avion[j];
                 ae.avion[j] = temp;
             }
-            
         }
-        
     }
-    
 }
-void trie_global(){
+void trie_global()
+{
     printf("\n--- Choisir le nouveau statut ---\n");
     printf("1 - Trie par capacite\n");
     printf("2 - Trie par modele\n");
@@ -263,11 +259,10 @@ void trie_global(){
         trie_par_model();
         affichage_avions();
         break;
-    
+
     default:
         break;
     }
-
 }
 void Rechercher_un_avion()
 {
@@ -316,17 +311,71 @@ void supprimer()
         {
             for (int j = i; j < ae.nbAvions - 1; j++)
             {
-                ae.avion[i] = ae.avion[i + 1];
+                ae.avion[j] = ae.avion[j + 1];
             }
             ae.nbAvions--;
             printf("Avion supprime \n");
-            return;
         }
     }
     printf("Aucun avion trouve avec cet ID \n");
 }
-void Statistiques(){
-    
+void Statistiques()
+{
+    int m = 0, d = 0, e = 0, av_d = 0;
+    int total_capacite = 0;
+    printf("\n===============================================================\n");
+    printf("                         Statistiques                            \n");
+    printf("===============================================================\n");
+    for (int i = 0; i < ae.nbAvions; i++)
+    {
+        if (stricmp(ae.avion[i].statut, "Disponible") == 0)
+        {
+            av_d++;
+        }
+    }
+
+    printf("Nombre total d avions dans le parc : %d avions\n", av_d);
+
+    for (int i = 0; i < ae.nbAvions; i++)
+    {
+        if (stricmp(ae.avion[i].statut, "Disponible") == 0)
+        {
+            d++;
+        }
+        else if (stricmp(ae.avion[i].statut, "En vol") == 0)
+        {
+            e++;
+        }
+        else
+        {
+            m++;
+        }
+    }
+
+    printf("Nombre d avions par statut : \n");
+    printf("# Disponible  : %d \n", d);
+    printf("# En vol :  %d \n", e);
+    printf("# Maintenance %d : \n", m);
+
+    for (int i = 0; i < ae.nbAvions; i++)
+    {
+        total_capacite += ae.avion[i].capacite;
+    }
+    printf("# Capacité totale de la flotte  : %d\n", total_capacite);
+
+    //min et max
+    trie_par_capacite();
+    printf("L avion Grande Capacite : \n");
+    printf("#Id : %d | #Modele : %s | #Capacite : %d | #statut : %s \n", ae.avion[0].idAvion, ae.avion[0].modele, ae.avion[0].capacite, ae.avion[0].statut);
+
+    printf("L avion Petite Capacite : \n");
+    printf("#Id : %d | #Modele : %s | #Capacite : %d | #statut : %s \n", ae.avion[ae.nbAvions-1].idAvion, ae.avion[ae.nbAvions-1].modele, ae.avion[ae.nbAvions-1].capacite, ae.avion[ae.nbAvions-1].statut);
+
+    float average = (total_capacite *100) / ae.nbAvions;
+    float coffiece = average/100;
+    printf("pourcentage d avions disponibles dans l aeroport : %.0f % ",average);
+    printf("coefficient sous forme numérique : %.0f  ",coffiece);
+
 }
 
 int main()
@@ -349,6 +398,7 @@ int main()
         printf("#  5 # Afficher la liste des avions                           #\n");
         printf("#  6 # Rechercher un avion (par id ou par modele).            #\n");
         printf("#  7 # Trier les avions (par capacite, par modele)            #\n");
+        printf("#  8 # Afficher Statistiques                                  #\n");
         printf("#  0 # Quitter                                                #\n");
         printf("===============================================================\n\n");
         choix = Validation_choix("Entre un choix dans Menu : ");
@@ -374,6 +424,9 @@ int main()
             break;
         case 7:
             trie_global();
+            break;
+        case 8:
+            Statistiques();
             break;
         case 0:
             printf("Fin du programme. \n");
