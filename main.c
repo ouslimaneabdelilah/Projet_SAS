@@ -3,10 +3,17 @@
 #define Max 200
 typedef struct
 {
+    int jour;
+    int mois;
+    int annee;
+} Date;
+typedef struct
+{
     int idAvion;
     char modele[30];
     int capacite;
     char statut[20];
+    Date date_av;
 } Avions;
 
 typedef struct
@@ -19,21 +26,58 @@ typedef struct
 Aeroport ae;
 
 // function validation number
-int Validation_choix(char prompt[])
+int Validation_int(char prompt[])
 {
     int number;
     while (1)
     {
         printf("%s", prompt);
         if (scanf("%d", &number) == 1)
-            break;
+            if (number >= 0 && number < 300)
+            {
+                break;
+            }
+
         while (getchar() != '\n')
             ;
         printf("S'il vous plait saisir un nombre n'est pas chain character \n");
     }
     return number;
 }
+// function date comparaison
+int datecmp(int j1,int m1,int y1,int j2,int m2, int y2){
+    if (y1>y2)
+    {
+        return 1;
 
+    }else if(y1<y2){
+        return -1;
+    }else{
+        if(m1>m2){
+            return 1;
+        }else if (m1<m2)
+        {
+            return -1;
+        }else{
+            if (j1>j2)
+            {
+                return 1;
+            }else if (j1<j2)
+            {
+                return -1;
+
+            }
+            else{
+                return 0;
+            }
+
+        }
+
+    }
+    return 0;
+
+}
+// function Ajoute l'avion
 void Ajoute_avions()
 {
     int numb;
@@ -43,14 +87,30 @@ void Ajoute_avions()
     {
         ae.avion[ae.nbAvions].idAvion = ae.nbAvions + 1;
         printf("Saisir le model de l'avion %d : ", i + 1);
+
         scanf(" %[^\n]%*c", ae.avion[ae.nbAvions].modele);
-        printf("Saisir la capacite de l'avion %d : ", i + 1);
-        scanf("%d", &ae.avion[ae.nbAvions].capacite);
+        ae.avion[ae.nbAvions].capacite = Validation_int("Saisir la capacite de l'avion  : ");
+        while (1)
+        {
+            printf("Saisir la date en Form (Jour/mois/annee) : ");
+            if (scanf("%d / %d / %d", &ae.avion[ae.nbAvions].date_av.jour, &ae.avion[ae.nbAvions].date_av.mois, &ae.avion[ae.nbAvions].date_av.annee) == 3)
+            {
+                printf("%d", ae.avion[ae.nbAvions].date_av.jour);
+                if ((ae.avion[ae.nbAvions].date_av.jour <= 31 && ae.avion[ae.nbAvions].date_av.jour > 0) && (ae.avion[ae.nbAvions].date_av.mois <= 12 && ae.avion[ae.nbAvions].date_av.mois > 0) && (ae.avion[ae.nbAvions].date_av.annee > 1903))
+                {
+                    break;
+                }
+            };
+            while (getchar() != '\n')
+                break;
+            printf("S'il vous plait saisir date valide le type de date integer est sont format (Jour/mois/année) \n");
+        }
         strcpy(ae.avion[ae.nbAvions].statut, "Disponible");
         ae.nbAvions++;
     }
+    printf("Ajoute Succuss !!!!!");
 }
-
+// function affichage aeroport
 void affichage_aeroport()
 {
     printf("\n===============================================================\n");
@@ -58,15 +118,18 @@ void affichage_aeroport()
     printf("Nombre d'avions   : %d\n", ae.nbAvions);
     printf("===============================================================\n");
 }
-
+// function affichage avions
 void affichage_avions()
 {
 
     for (int i = 0; i < ae.nbAvions; i++)
     {
-        printf("# id: %d |model : %s | capacite : %d | status : %s #\n", ae.avion[i].idAvion, ae.avion[i].modele, ae.avion[i].capacite, ae.avion[i].statut);
+        printf("# id: %d |model : %s | capacite : %d | status : %s | date entre : | %d / %d / %d#\n",
+               ae.avion[i].idAvion, ae.avion[i].modele, ae.avion[i].capacite, ae.avion[i].statut,
+               ae.avion[i].date_av.jour, ae.avion[i].date_av.mois, ae.avion[i].date_av.annee);
     }
 }
+// function recherch par id
 int recherch_id()
 {
     int id_r;
@@ -79,6 +142,7 @@ int recherch_id()
     }
     return -1;
 }
+// function rechercher par model
 void recherch_model()
 {
     char modele[30];
@@ -104,6 +168,8 @@ void recherch_model()
         printf("Aucun avion trouve avec ce modele \n");
     }
 }
+
+// function modifier un avion
 void modifier_avion()
 {
     int r = recherch_id();
@@ -119,10 +185,11 @@ void modifier_avion()
             printf("#  2 # Modifier la capacite                                   #\n");
             printf("#  3 # Modifier le statut                                     #\n");
             printf("#  4 # Modifier toutes les infos de l'avion                   #\n");
+            printf("#  5 # Modifier la date                                       #\n");
             printf("#  0 # Retour au menu principal                               #\n");
             printf("===============================================================\n\n");
 
-            choix = Validation_choix("Entrez votre choix : ");
+            choix = Validation_int("Entrez votre choix : ");
 
             switch (choix)
             {
@@ -136,8 +203,9 @@ void modifier_avion()
             }
             case 2:
             {
-                printf("Nouvelle capacite (actuelle: %d) : ", ae.avion[r].capacite);
-                scanf("%d", &ae.avion[r].capacite);
+                // printf("Nouvelle capacite (actuelle: %d) : ", ae.avion[r].capacite);
+                // scanf("%d", &ae.avion[r].capacite);
+                ae.avion[r].capacite = Validation_int("Nouvelle capacite : ");
                 break;
             }
             case 3:
@@ -147,7 +215,7 @@ void modifier_avion()
                 printf("1 - Disponible\n");
                 printf("2 - En vol    \n");
                 printf("3 - Maintenance\n");
-                st = Validation_choix("Votre choix : ");
+                st = Validation_int("Votre choix : ");
                 switch (st)
                 {
                 case 1:
@@ -180,7 +248,7 @@ void modifier_avion()
                 printf("1 - Disponible\n");
                 printf("2 - En vol\n");
                 printf("3 - Maintenance\n");
-                st = Validation_choix("Votre choix : ");
+                st = Validation_int("Votre choix : ");
                 switch (st)
                 {
                 case 1:
@@ -198,6 +266,22 @@ void modifier_avion()
                 }
                 break;
             }
+            case 5:
+                while (1)
+                {
+                    printf("Saisir nauvelle date en Form (Jour/mois/annee) (actuelle: %d / %d / %d): ",ae.avion[r].date_av.jour, ae.avion[r].date_av.mois, ae.avion[r].date_av.annee);
+                    if (scanf("%d / %d / %d", &ae.avion[r].date_av.jour, &ae.avion[r].date_av.mois, &ae.avion[r].date_av.annee) == 3)
+                    {
+                        if ((ae.avion[r].date_av.jour <= 31 && ae.avion[r].date_av.jour > 0) && (ae.avion[r].date_av.mois <= 12 && ae.avion[r].date_av.mois > 0) && (ae.avion[r].date_av.annee > 1903))
+                        {
+                            break;
+                        }
+                    };
+                    while (getchar() != '\n')
+                        break;
+                    printf("S'il vous plait saisir date valide le type de date integer est sont format (Jour/mois/année) \n");
+                }
+                break;
             case 0:
                 printf("Retour au menu principal...\n");
                 break;
@@ -212,6 +296,8 @@ void modifier_avion()
         printf("Avion introuvable \n");
     }
 }
+
+// function trie par capacite
 void trie_par_capacite()
 {
     for (int i = 0; i < ae.nbAvions; i++)
@@ -227,6 +313,7 @@ void trie_par_capacite()
         }
     }
 }
+// function trie par model
 void trie_par_model()
 {
     for (int i = 0; i < ae.nbAvions; i++)
@@ -242,13 +329,33 @@ void trie_par_model()
         }
     }
 }
+// function trie par date
+void trie_par_date(){
+    for (int i = 0; i < ae.nbAvions; i++)
+    {
+        for (int j = i+1; j < ae.nbAvions; j++)
+        {
+            if (datecmp(ae.avion[i].date_av.jour,ae.avion[i].date_av.mois,ae.avion[i].date_av.annee,ae.avion[j].date_av.jour,ae.avion[j].date_av.mois,ae.avion[j].date_av.annee)==1)
+            {
+                Avions temp = ae.avion[i];
+                ae.avion[i] = ae.avion[j];
+                ae.avion[j] = temp;
+            }
+            
+        }
+        
+    }
+    
+}
+// function trie global appele les function trie capacite et modele
 void trie_global()
 {
     printf("\n--- Choisir le nouveau statut ---\n");
     printf("1 - Trie par capacite\n");
     printf("2 - Trie par modele\n");
+    printf("3 - Trie par date\n");
     int ch;
-    ch = Validation_choix("Entre le choix de recherch : ");
+    ch = Validation_int("Entre le choix de recherch : ");
     switch (ch)
     {
     case 1:
@@ -259,11 +366,17 @@ void trie_global()
         trie_par_model();
         affichage_avions();
         break;
+    case 3:
+        trie_par_date();
+        affichage_avions();
+        break;
 
     default:
         break;
     }
 }
+
+// function de rechercher un avion appele function rechercher par id
 void Rechercher_un_avion()
 {
     int ch;
@@ -272,7 +385,7 @@ void Rechercher_un_avion()
     printf("1 - recherch par id\n");
     printf("2 - recherch par model    \n");
     printf("Retour au menu principal  \n");
-    ch = Validation_choix("Votre choix : ");
+    ch = Validation_int("Votre choix : ");
     switch (ch)
     {
     case 1:
@@ -299,7 +412,7 @@ void Rechercher_un_avion()
         break;
     }
 }
-
+// function supprimier
 void supprimer()
 {
     int id_s;
@@ -319,6 +432,8 @@ void supprimer()
     }
     printf("Aucun avion trouve avec cet ID \n");
 }
+
+// function pour Statistique
 void Statistiques()
 {
     int m = 0, d = 0, e = 0, av_d = 0;
@@ -363,19 +478,18 @@ void Statistiques()
     }
     printf("# Capacité totale de la flotte  : %d\n", total_capacite);
 
-    //min et max
+    // min et max
     trie_par_capacite();
-    printf("L avion Grande Capacite : \n");
-    printf("#Id : %d | #Modele : %s | #Capacite : %d | #statut : %s \n", ae.avion[0].idAvion, ae.avion[0].modele, ae.avion[0].capacite, ae.avion[0].statut);
+    printf("# L avion Grande Capacite : \n");
+    printf("# Id : %d | #Modele : %s | #Capacite : %d | #statut : %s \n", ae.avion[0].idAvion, ae.avion[0].modele, ae.avion[0].capacite, ae.avion[0].statut);
 
-    printf("L avion Petite Capacite : \n");
-    printf("#Id : %d | #Modele : %s | #Capacite : %d | #statut : %s \n", ae.avion[ae.nbAvions-1].idAvion, ae.avion[ae.nbAvions-1].modele, ae.avion[ae.nbAvions-1].capacite, ae.avion[ae.nbAvions-1].statut);
+    printf("# L avion Petite Capacite : \n");
+    printf("# Id : %d | #Modele : %s | #Capacite : %d | #statut : %s \n", ae.avion[ae.nbAvions - 1].idAvion, ae.avion[ae.nbAvions - 1].modele, ae.avion[ae.nbAvions - 1].capacite, ae.avion[ae.nbAvions - 1].statut);
 
-    float average = (total_capacite *100) / ae.nbAvions;
-    float coffiece = average/100;
-    printf("pourcentage d avions disponibles dans l aeroport : %.0f % ",average);
-    printf("coefficient sous forme numérique : %.0f  ",coffiece);
-
+    float average = (total_capacite * 100) / ae.nbAvions;
+    float coffiece = average / 100;
+    printf("# pourcentage d avions disponibles dans l aeroport : %.0f %% ", average);
+    printf("# coefficient sous forme numérique : %.0f  ", coffiece);
 }
 
 int main()
@@ -401,7 +515,7 @@ int main()
         printf("#  8 # Afficher Statistiques                                  #\n");
         printf("#  0 # Quitter                                                #\n");
         printf("===============================================================\n\n");
-        choix = Validation_choix("Entre un choix dans Menu : ");
+        choix = Validation_int("Entre un choix dans Menu : ");
         switch (choix)
         {
         case 1:
