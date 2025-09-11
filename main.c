@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #define Max 200
-int id = 0; // id unique
+int id = 1; // id unique
 typedef struct
 {
     int idAvion;
@@ -90,7 +90,7 @@ void recherch_model()
     int trouve = 0;
     for (int i = 0; i < ae.nbAvions; i++)
     {
-        if (strcmp(ae.avion[i].modele, modele) == 0)
+        if (stricmp(ae.avion[i].modele, modele) == 0)
         {
             printf("\n=== Avion trouve ===\n");
             printf("# id: %d | modele : %s | capacite : %d | statut : %s #\n",
@@ -214,6 +214,61 @@ void modifier_avion()
         printf("Avion introuvable \n");
     }
 }
+void trie_par_capacite(){
+    for (int i = 0; i < ae.nbAvions; i++)
+    {
+        for (int j = i+1; j < ae.nbAvions; j++)
+        {
+            if (ae.avion[i].capacite > ae.avion[j].capacite)
+            {
+                Avions temp = ae.avion[i];
+                ae.avion[i] = ae.avion[j];
+                ae.avion[j] = temp;
+            }
+            
+        }
+        
+    }    
+}
+void trie_par_model(){
+    for (int i = 0; i < ae.nbAvions; i++)
+    {
+        for (int j = i+1; j < ae.nbAvions; j++)
+        {
+            if (stricmp(ae.avion[i].modele,ae.avion[j].modele)>0)
+            {
+                Avions temp = ae.avion[i];
+                ae.avion[i] = ae.avion[j];
+                ae.avion[j] = temp;
+            }
+            
+        }
+        
+    }
+    
+}
+void trie_global(){
+    printf("\n--- Choisir le nouveau statut ---\n");
+    printf("1 - Trie par capacite\n");
+    printf("2 - Trie par modele\n");
+    int ch;
+    ch = Validation_choix("Entre le choix de recherch : ");
+    switch (ch)
+    {
+    case 1:
+        trie_par_capacite();
+        affichage_avions();
+        break;
+    case 2:
+        trie_par_model();
+        affichage_avions();
+        break;
+    
+    default:
+        break;
+    }
+
+}
 void Rechercher_un_avion()
 {
     int ch;
@@ -270,6 +325,9 @@ void supprimer()
     }
     printf("Aucun avion trouve avec cet ID \n");
 }
+void Statistiques(){
+    
+}
 
 int main()
 {
@@ -313,6 +371,9 @@ int main()
             break;
         case 6:
             Rechercher_un_avion();
+            break;
+        case 7:
+            trie_global();
             break;
         case 0:
             printf("Fin du programme. \n");
